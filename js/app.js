@@ -6,11 +6,71 @@ const prevButton = document.getElementById("prevButton");
 const nextButton = document.getElementById("nextButton");
 const paginationDiv = document.getElementById("paginationDiv");
 const pageDiv = document.getElementById("page");
+const filterByTopic = document.getElementById("filterByTopic");
+const searchInput = document.getElementById("searchInput");
+const successAlert = document.getElementById("successAlert");
+const dangerAlert = document.getElementById("dangerAlert");
+
+const topics = [
+      {
+            label: "Children",
+            value: "children",
+      },
+      {
+            label: "Dream",
+            value: "dream",
+      },
+      {
+            label: "Cook",
+            value: "cook",
+      },
+      {
+            label: "History",
+            value: "history",
+      },
+];
+
+const localStorageKey = {
+      searchData: "searchData",
+      filter: "topic",
+      page: "page",
+      wishlist: "wishlist"
+}
 
 let searchData = "";
-let currentPage = 1, countTotalResult = 0;
+let currentPage = 1, countTotalResult = 0, topic = "", allBooks;
 
-const fetchBooks = async (searchData = "", page = currentPage) => {
+const showAlert = (element, text) => {
+
+      element.innerText = text;
+      element.classList.remove('hidden', "-right-8");
+
+      // Hide the alert after 3 seconds
+      setTimeout(function () {
+            element.classList.add('hidden', '-right-8');
+      }, 3000);
+}
+
+const addToWishlist = (book, button) => {
+      const getWishlist = JSON.parse(localStorage.getItem(localStorageKey.wishlist)) || [];
+
+      const isExist = getWishlist?.find(bookItems => bookItems?.id == book.id);
+
+      if (isExist) {
+            showAlert(dangerAlert, '❌ Already exist in the wishlist');
+            return;
+      }
+
+      const newWishlist = [...getWishlist, book];
+      localStorage.setItem(localStorageKey.wishlist, JSON.stringify(newWishlist));
+
+      showAlert(successAlert, '✅ Successfully added in the wishlist');
+
+      // Add 'wishlist-active' class to change the icon background and style
+      button.classList.add('text-red-600');
+}
+
+const fetchBooks = async (searchData = "", page = currentPage, topic = "") => {
       loading.classList.remove("hidden");
 
       nextButton.disabled = true;
@@ -22,12 +82,10 @@ const fetchBooks = async (searchData = "", page = currentPage) => {
             paginationDiv.classList.add("hidden");
       }
 
-
-      console.log(page);
-
       try {
-            const response = await fetch(`https://gutendex.com/books?search=${searchData}&page=${page}`);
+            const response = await fetch(`https://gutendex.com/books?search=${searchData}&page=${page}&topic=${topic}`);
             const books = await response.json();
+            allBooks = books;
             countTotalResult = books.count;
 
             return books;
@@ -47,7 +105,6 @@ const fetchBooks = async (searchData = "", page = currentPage) => {
 }
 
 const displayBooks = (books) => {
-      console.log(books);  // Log the books object
       bookSection.innerHTML = "";
       totalResult.innerText = "";
 
@@ -64,7 +121,10 @@ const displayBooks = (books) => {
                   </div>
                   <h3 class="text-base md:text-lg lg:text-xl font-bold">${book.title.length > 30 ? book.title.slice(0, 27) + "..." : book.title}</h3>
                   <p>By: ${book.authors.map(author => author.name).join(",")}</p>
-                  <a href="/details.html?id=${book.id}" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg">Book Details</a>
+                  <div class="flex flex-wrap items-center justify-between">
+                        <a href="/details.html?id=${book.id}" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg">Book Details</a>
+                        <ion-icon name="heart-circle-outline" class="text-2xl cursor-pointer add-to-wishlist" data-book-id="${book.id}"></ion-icon>
+                  </div>
             </div>
             `
             bookSection.appendChild(bookCard)
@@ -89,6 +149,17 @@ const displayBooks = (books) => {
             nextButton.disabled = true;
             nextButton.classList.add("bg-gray-300");
       }
+
+      // Attach event listeners after the book cards are rendered
+      document.querySelectorAll('.add-to-wishlist').forEach(button => {
+            button.addEventListener('click', function (event) {
+                  event.preventDefault(); // Prevent the default anchor behavior
+                  const bookId = this.getAttribute('data-book-id');
+                  const book = books.results.find(b => b.id == bookId);
+                  addToWishlist(book, this); // Call the addToWishlist function directly
+
+            });
+      });
 }
 
 let debounceTimeout;
@@ -103,37 +174,63 @@ const debounce = (func, delay) => {
       };
 };
 
+
+const handlePage = async (btn, value) => {
+      if (btn === 'prev' && currentPage > 1) {
+            currentPage = currentPage + value;
+            const books = await fetchBooks(searchData, currentPage, topic);
+            displayBooks(books)
+      }
+      if (btn === 'next') {
+            currentPage = currentPage + value;
+            const books = await fetchBooks(searchData, currentPage, topic);
+            displayBooks(books)
+      }
+      localStorage.setItem(localStorageKey.page, currentPage);
+}
+
+const handleFilterByGenre = async () => {
+      topic = filterByTopic.value;
+      localStorage.setItem(localStorageKey.filter, topic || "");
+
+      const books = await fetchBooks(searchData, currentPage, topic);
+      displayBooks(books);
+}
+
+
 const handleSearch = async (e) => {
       if (searchData !== e.target.value) {
             currentPage = 1;
       }
       searchData = e.target.value;
-      const books = await fetchBooks(searchData);
+      localStorage.setItem(localStorageKey.searchData, searchData || "");
+
+      const books = await fetchBooks(searchData, currentPage, topic);
       displayBooks(books);
 }
 // Wrap the handleSearch function with the debouncer
-document.getElementById("searchInput").addEventListener("input", debounce(handleSearch, 500)); // 500ms delay
-
-const handlePrevPage = async () => {
-      if (currentPage > 1) {
-            currentPage = currentPage - 1;
-            const books = await fetchBooks(searchData, currentPage);
-            displayBooks(books)
-      }
-}
-
-const handleNextPage = async () => {
-      // if(currentPage > 1){
-      currentPage = currentPage + 1;
-      const books = await fetchBooks(searchData, currentPage);
-      displayBooks(books)
-      // }
-}
+searchInput.addEventListener("input", debounce(handleSearch, 500)); // 500ms delay
 
 // Wait for the DOM to fully load before fetching books
 window.addEventListener("load", async () => {
-      const books = await fetchBooks();
+      searchData = localStorage.getItem(localStorageKey.searchData) || "";
+      topic = localStorage.getItem(localStorageKey.filter) || "";
+      currentPage = Number(localStorage.getItem(localStorageKey.page)) || 1;
+
+      topics.forEach(topic => {
+            const option = document.createElement("option");
+            option.value = topic.value;
+            option.textContent = topic.label;
+            filterByTopic.appendChild(option);
+            filterByTopic.appendChild(option)
+      })
+
+      if (searchData) {
+            searchInput.value = searchData;
+      }
+      if (topic) {
+            filterByTopic.value = topic;
+      }
+      const books = await fetchBooks(searchData, currentPage, topic);
       displayBooks(books);
 });
-
-// fetchBooks()

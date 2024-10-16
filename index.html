@@ -2,81 +2,89 @@
 <html lang="en">
 
 <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Books</title>
-      <script src="https://cdn.tailwindcss.com"></script>
-      <script>
-            tailwind.config = {
-                  theme: {
-                        extend: {
-                              colors: {
-                                    clifford: '#da373d',
-                              },
-                              screens: {
-                                    xxs: "540px"
-                              }
-                        }
-                  }
-            }
-      </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Books</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clifford: "#da373d",
+          },
+          screens: {
+            xxs: "540px",
+          },
+        },
+      },
+    };
+  </script>
 </head>
 
-<body>
-      <header class='flex bg-amber-100 py-3 px-6 sm:px-10 font-[sans-serif] min-h-[70px] tracking-wide relative z-50'>
-            <div class='container mx-auto flex flex-wrap items-center justify-between gap-4 w-full'>
-                  <a href="/" class="w-[150px] flex items-center gap-2">
-                        <img src="./assets/books-icon.png" alt="book" class="w-[50px]">
-                        <span class="text-orange-500 text-3xl font-bold">Books</span>
-                  </a>
+<body class="min-h-[100vh]">
+  <header class="flex bg-amber-100 py-3 px-6 sm:px-10 font-[sans-serif] min-h-[70px] tracking-wide z-50">
+    <div class="container mx-auto flex flex-wrap items-center justify-between gap-4 w-full">
+      <a href="/" class="w-[150px] flex items-center gap-2">
+        <img src="./assets/books-icon.png" alt="book" class="w-[50px]" />
+        <span class="text-orange-500 text-3xl font-bold">Books</span>
+      </a>
 
-                  <div class='flex items-center max-lg:ml-auto gap-2'>
-                        <input type="text" placeholder="Search books..." id="searchInput"
-                              class="bg-white border-2 border-amber-300 text-sm w-full px-5 rounded-full h-9 outline-orange-500 " />
+      <div class="flex items-center max-lg:ml-auto gap-2">
+        <input type="text" placeholder="Search books..." id="searchInput"
+          class="bg-white border-2 border-amber-300 text-sm w-full px-5 rounded-full h-9 outline-orange-500" />
 
-                        <a href='javascript:void(0)'
-                              class='text-orange-500 hover:text-orange-700 text-base flex items-center space-x-1'>
-                              <ion-icon name="heart-outline" class="text-2xl"></ion-icon>
-                              <span class="hidden sm:inline-block">Wishlist</span>
-                        </a>
-                  </div>
-            </div>
-      </header>
-      <main class="container mx-auto px-6 sm:px-10 my-10">
-            <p id="loading" class="">Loading...</p>
-            <p id="totalResult"></p>
+        <a href="/wishlist.html" class="text-orange-500 hover:text-orange-700 text-base flex items-center space-x-1">
+          <ion-icon name="heart-outline" class="text-2xl"></ion-icon>
+          <span class="hidden sm:inline-block">Wishlist</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
-            <!-- pagination -->
-            <!-- <div id="paginationDiv">
-                  <span id="countResult"></span>
-                  <button id="prevButton" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg"
-                  onclick="handlePrevPage()">&#x276E;</button>
-                  <span id="page"></span>
-                  <button id="nextButton" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg"
-                  onclick="handleNextPage()">&#x276F;</button>
-            </div> -->
+  <div class="relative">
+    <p id="successAlert" class="fixed z-50 top-24 -right-8 bg-white border border-green-500 px-3 text-green-500 hidden">
+    </p>
+    <p id="dangerAlert" class="fixed z-50 top-24 -right-8 bg-white border border-red-500 px-3 text-red-500 hidden">
+    </p>
+  </div>
 
-            <!-- books  -->
-            <section id="books" class="grid xxs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 my-10">
-            </section>
+  <main class="container mx-auto px-6 sm:px-10 my-10">
+    <div class="flex flex-row flex-wrap justify-between items-center">
+      <p id="totalResult"></p>
+      <select name="topic" id="filterByTopic" class="border-2 border-amber-300 px-5 py-1 rounded-lg"
+        onchange="handleFilterByGenre()">
+        <option value="" selected>Select Genre to filter</option>
+      </select>
+    </div>
 
-            <!-- pagination -->
-            <div id="paginationDiv" class="flex flex-col xxs:flex-row items-center gap-3">
-                  <span id="countResult"></span>
-                  <div>
-                        <button id="prevButton" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg"
-                              onclick="handlePrevPage()">&#x276E;</button>
-                        <span id="page" class="px-2 font-bold"></span>
-                        <button id="nextButton" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg"
-                              onclick="handleNextPage()">&#x276F;</button>
-                  </div>
-            </div>
-      </main>
+    <!-- Loading -->
+    <p id="loading" class="">Loading...</p>
 
-      <!-- Script -->
-      <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-      <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-      <script src="/js/app.js"></script>
+    <!-- books  -->
+    <section id="books" class="grid xxs:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 my-10"></section>
+
+    <!-- pagination -->
+    <div id="paginationDiv" class="flex flex-col xxs:flex-row items-center gap-3">
+      <span id="countResult"></span>
+      <div>
+        <button id="prevButton" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg"
+          onclick="handlePage('prev', -1)">
+          &#x276E;
+        </button>
+        <span id="page" class="px-2 font-bold"></span>
+        <button id="nextButton" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg"
+          onclick="handlePage('next', 1)">
+          &#x276F;
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <script src="/js/app.js"></script>
 </body>
 
 </html>

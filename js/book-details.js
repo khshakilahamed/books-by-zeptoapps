@@ -26,8 +26,6 @@ const displayBookDetails = async () => {
       const bookId = getBookIdFromUrl();  // Get the book ID from the URL
       const book = await fetchBookById(bookId);  // Fetch the book details
 
-      console.log(book);
-
       const bookDetailsSection = document.getElementById('book-details');
       // bookDetailsSection.classList.add("flex")
       if (book) {
