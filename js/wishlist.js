@@ -21,7 +21,7 @@ const displayBooks = (books) => {
       console.log(books);  // Log the books object
       wishlistSection.innerHTML = "";
 
-      if(!books.length){
+      if(!books || !books.length){
             wishlistEmptyMessage.classList.remove('hidden');
             return;
       }
