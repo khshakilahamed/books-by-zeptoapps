@@ -34,11 +34,20 @@ const localStorageKey = {
       searchData: "searchData",
       filter: "topic",
       page: "page",
-      wishlist: "wishlist"
+      wishlist: "wishlist",
+      storeBooks: "storeBooks",
 }
 
 let searchData = "";
-let currentPage = 1, countTotalResult = 0, topic = "", allBooks;
+let currentPage = 1, countTotalResult = 0, topic = "";
+
+const setToLocalStorage = (key, value) => {
+      localStorage.setItem(key, JSON.stringify(value));
+}
+
+const getFromLocalStorage = (key) => {
+      return JSON.parse(localStorage.getItem(key));
+}
 
 const showAlert = (element, text) => {
 
@@ -52,7 +61,7 @@ const showAlert = (element, text) => {
 }
 
 const addToWishlist = (book, button) => {
-      const getWishlist = JSON.parse(localStorage.getItem(localStorageKey.wishlist)) || [];
+      const getWishlist = getFromLocalStorage(localStorageKey.wishlist) || [];
 
       const isExist = getWishlist?.find(bookItems => bookItems?.id == book.id);
 
@@ -62,7 +71,7 @@ const addToWishlist = (book, button) => {
       }
 
       const newWishlist = [...getWishlist, book];
-      localStorage.setItem(localStorageKey.wishlist, JSON.stringify(newWishlist));
+      setToLocalStorage(localStorageKey.wishlist, newWishlist);
 
       showAlert(successAlert, '✅ Successfully added in the wishlist');
 
@@ -71,12 +80,21 @@ const addToWishlist = (book, button) => {
 }
 
 const fetchBooks = async (searchData = "", page = currentPage, topic = "") => {
+
+      const storedBooks = getFromLocalStorage(localStorageKey.storeBooks) || {};
+
+      if (storedBooks[page + searchData + topic]) {
+            countTotalResult = storedBooks[page + searchData + topic].count;
+            return storedBooks[page + searchData + topic];
+      }
+
       loading.classList.remove("hidden");
 
       nextButton.disabled = true;
       nextButton.classList.add("bg-gray-300");
       nextButton.disabled = true;
       prevButton.classList.add("bg-gray-300");
+
 
       if (countTotalResult === 0) {
             paginationDiv.classList.add("hidden");
@@ -85,8 +103,8 @@ const fetchBooks = async (searchData = "", page = currentPage, topic = "") => {
       try {
             const response = await fetch(`https://gutendex.com/books?search=${searchData}&page=${page}&topic=${topic}`);
             const books = await response.json();
-            allBooks = books;
             countTotalResult = books.count;
+            setToLocalStorage(localStorageKey.storeBooks, { ...storedBooks, [page + searchData + topic]: books });
 
             return books;
       } catch (error) {
@@ -108,19 +126,20 @@ const displayBooks = (books) => {
       bookSection.innerHTML = "";
       totalResult.innerText = "";
 
-      totalResult.innerText = `Total Result: ${books.count}`;
+      totalResult.innerText = books?.count ? `Total Result: ${books.count}` : '';
 
-      books?.results.forEach(book => {
+      books?.results && books?.results.forEach(book => {
             const bookCard = document.createElement("div");
             bookCard.classList.add("border", "border-2", "border-amber-300", "rounded-lg", "p-3")
 
             bookCard.innerHTML = `
-            <div class="p-1 sm:p-2">
+            <div class="p-1 sm:p-2 flex flex-col h-full">
                   <div class="flex justify-center overflow-hidden h-[250px] xxs:h-[150px] sm:h-[200px] lg:h-[300px] rounded-lg">
                         <img class="hover:scale-125 transform-transition duration-200 w-full" src=${book.formats["image/jpeg"]} alt=${book.title}/>
                   </div>
                   <h3 class="text-base md:text-lg lg:text-xl font-bold">${book.title.length > 30 ? book.title.slice(0, 27) + "..." : book.title}</h3>
                   <p>By: ${book.authors.map(author => author.name).join(",")}</p>
+                  <div class="flex-grow"></div>
                   <div class="flex flex-wrap items-center justify-between">
                         <a href="/details.html?id=${book.id}" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg">Book Details</a>
                         <ion-icon name="heart-circle-outline" title="Add to wishlist" class="text-3xl cursor-pointer add-to-wishlist hover:text-red-600" data-book-id="${book.id}"></ion-icon>
@@ -130,7 +149,7 @@ const displayBooks = (books) => {
             bookSection.appendChild(bookCard)
       });
 
-      countResultDisplay.innerText = `Showing ${(currentPage - 1) * 32 + 1} to ${countTotalResult > currentPage * 32 ? currentPage * 32 : countTotalResult} | ${countTotalResult}`
+      countResultDisplay.innerText = `Showing ${(currentPage - 1) * 32 + 1} to ${countTotalResult > currentPage * 32 ? currentPage * 32 : countTotalResult} | ${countTotalResult ? countTotalResult : ''}`
       pageDiv.innerText = currentPage;
 
       // Button disable
@@ -186,12 +205,14 @@ const handlePage = async (btn, value) => {
             const books = await fetchBooks(searchData, currentPage, topic);
             displayBooks(books)
       }
-      localStorage.setItem(localStorageKey.page, currentPage);
+      setToLocalStorage(localStorageKey.page, currentPage);
 }
 
 const handleFilterByGenre = async () => {
       topic = filterByTopic.value;
-      localStorage.setItem(localStorageKey.filter, topic || "");
+      currentPage = 1;
+      setToLocalStorage(localStorageKey.filter, topic || "");
+      setToLocalStorage(localStorageKey.page, currentPage);
 
       const books = await fetchBooks(searchData, currentPage, topic);
       displayBooks(books);
@@ -203,7 +224,8 @@ const handleSearch = async (e) => {
             currentPage = 1;
       }
       searchData = e.target.value;
-      localStorage.setItem(localStorageKey.searchData, searchData || "");
+      setToLocalStorage(localStorageKey.searchData, searchData || "");
+      setToLocalStorage(localStorageKey.page, currentPage || 1);
 
       const books = await fetchBooks(searchData, currentPage, topic);
       displayBooks(books);
@@ -213,9 +235,9 @@ searchInput.addEventListener("input", debounce(handleSearch, 500)); // 500ms del
 
 // Wait for the DOM to fully load before fetching books
 window.addEventListener("load", async () => {
-      searchData = localStorage.getItem(localStorageKey.searchData) || "";
-      topic = localStorage.getItem(localStorageKey.filter) || "";
-      currentPage = Number(localStorage.getItem(localStorageKey.page)) || 1;
+      searchData = getFromLocalStorage(localStorageKey.searchData) || "";
+      topic = getFromLocalStorage(localStorageKey.filter) || "";
+      currentPage = Number(getFromLocalStorage(localStorageKey.page)) || 1;
 
       topics.forEach(topic => {
             const option = document.createElement("option");
