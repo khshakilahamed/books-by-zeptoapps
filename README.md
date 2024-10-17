@@ -1,6 +1,7 @@
 ## Important Links
+- Live Project Link: [Click Me](https://books-by-zeptoapps.vercel.app/)
 
-### Project Requirements
+## Project Requirements
 - Fetch data from the following public API:
 [https://gutendex.com/books](https://gutendex.com/books)
            For API Documentations visit -[ https://gutendex.com/]( https://gutendex.com/)
@@ -23,4 +24,12 @@
 #### Notes:
 - Don’t use any templates for the UI. 
 - You can use React JS or vanilla JS for this task, but we recommend using vanilla JS only.
-- You must create a public GitHub repository and upload files. Use proper commits. Send us the repository link once you complete the task. 
+- You must create a public GitHub repository and upload files. Use proper commits. Send us the repository link once you complete the task.
+
+
+## Some Bonus Part that I have done
+- Create a banner on the home page
+- Search and filter preferences save in the local storage when the page refresh.(According to requirement)
+- Created a debouncer for unnecessary search request.
+- Create altert after save book to the wishlist or remove from the wishlist.
+- Store the books in the local storage to prevent extra loading.
