@@ -123,7 +123,7 @@ const displayBooks = (books) => {
                   <p>By: ${book.authors.map(author => author.name).join(",")}</p>
                   <div class="flex flex-wrap items-center justify-between">
                         <a href="/details.html?id=${book.id}" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg">Book Details</a>
-                        <ion-icon name="heart-circle-outline" class="text-2xl cursor-pointer add-to-wishlist" data-book-id="${book.id}"></ion-icon>
+                        <ion-icon name="heart-circle-outline" title="Add to wishlist" class="text-3xl cursor-pointer add-to-wishlist hover:text-red-600" data-book-id="${book.id}"></ion-icon>
                   </div>
             </div>
             `

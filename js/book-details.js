@@ -10,7 +10,7 @@ const fetchBookById = async (id) => {
             return book;  // Return the book details
       } catch (error) {
             console.error('Error fetching book details:', error);
-      }finally{
+      } finally {
             loading.classList.add("hidden");
       }
 };
@@ -26,27 +26,34 @@ const displayBookDetails = async () => {
       const bookId = getBookIdFromUrl();  // Get the book ID from the URL
       const book = await fetchBookById(bookId);  // Fetch the book details
 
+      console.log(book);
+
       const bookDetailsSection = document.getElementById('book-details');
       // bookDetailsSection.classList.add("flex")
       if (book) {
             bookDetailsSection.innerHTML = `
-            <div class="flex gap-5">
-                  <div class="w-[50%]">
+            <div class="flex flex-col sm:flex-row gap-5">
+                  <div class="w-full sm:w-[50%]">
                         <img src="${book.formats['image/jpeg']}" alt="${book.title}" class="w-full h-auto mb-3" />
                   </div>
-                  <div class"w-[50%]">
-                        <h1 class="text-3xl font-bold mb-4">${book.title}</h1>
+                  <div class"w-full sm:w-[50%]">
+                        <h1 class="text-xl sm:text-xl md:text-3xl font-bold mb-4">${book.title}</h1>
                         
-                        <p><strong>Author:</strong> ${book.authors.map(author => author.name).join(', ')}</p>
+                        <p><strong>Author/s:</strong> ${book.authors.map(author => author.name).join(', ')}</p>
                         <p>
                               <strong>Subjects:</strong>
-                              <ul class="ml-3">
-                              ${
-                                    book.subjects.map(subject =>  `<li>${subject}</li>`).join('')
-                              }
+                              <ul class="list-disc ml-5">
+                              ${book.subjects.map(subject => `<li>${subject}</li>`).join('')
+                  }
                               </ul>
                         </p>
-                        <p><strong>Bookshelves:</strong> ${book.bookshelves.join(', ')}</p>
+                        <p>
+                        <strong>Bookshelves:</strong> 
+                        <ul class="list-disc ml-5">
+                              ${book.bookshelves.map(shelve => `<li>${shelve}</li>`).join('')
+                  }
+                              </ul>
+                        </p>
                         <p><strong>Download:</strong></p>
                         <ul class="list-disc pl-5">
                               <li><a href="${book.formats['application/epub+zip']}" target="_blank">EPUB</a></li>
