@@ -139,6 +139,7 @@ const displayBooks = (books) => {
                   </div>
                   <h3 class="text-base md:text-lg lg:text-xl font-bold">${book.title.length > 30 ? book.title.slice(0, 27) + "..." : book.title}</h3>
                   <p>By: ${book.authors.map(author => author.name).join(",")}</p>
+                  <p class="py-1">Book ID: ${book?.id}</p>
                   <div class="flex-grow"></div>
                   <div class="flex flex-wrap items-center justify-between">
                         <a href="/details.html?id=${book.id}" class="bg-orange-500 text-white inline-block px-3 py-1 my-2 rounded-lg">Book Details</a>
