@@ -1,4 +1,5 @@
 const wishlistSection = document.getElementById("wishlist");
+const wishlistEmptyMessage = document.getElementById("wishlist-empty-message");
 
 const localStorageKey = {
       searchData: "searchData",
@@ -19,6 +20,13 @@ const removeFromWishlist = (book) => {
 const displayBooks = (books) => {
       console.log(books);  // Log the books object
       wishlistSection.innerHTML = "";
+
+      if(!books.length){
+            wishlistEmptyMessage.classList.remove('hidden');
+            return;
+      }
+
+      wishlistEmptyMessage.classList.add('hidden');
 
       books?.forEach(book => {
             const bookCard = document.createElement("div");
