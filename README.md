@@ -29,7 +29,22 @@
 
 ## Some Bonus Part that I have done
 - Create a banner on the home page
-- Search and filter preferences save in the local storage when the page refresh.(According to requirement)
-- Created a debouncer for unnecessary search request.
-- Create altert after save book to the wishlist or remove from the wishlist.
-- Store the books in the local storage to prevent extra loading.
+- Saved search and filter preferences in local storage to persist through page refreshes (as per the requirement).
+- Implemented a debouncer to prevent unnecessary search request.
+- Added an alert after saving a book to the wishlist or removing it.
+- Stored books in local storage to reduce loading times and improve performance.
+- Created a page to view book details.
+
+
+## Images-
+### Home Page
+![Alt text](/assets/readme-file/landing-page.png)
+
+### Book Details Page
+![Alt text](/assets/readme-file/book-details.png)
+
+### Wishlist Page
+![Alt text](/assets/readme-file/wishlist.png)
+
+### Empty Wishlist Page
+![Alt text](/assets/readme-file/emplty%20wishlist.png)
